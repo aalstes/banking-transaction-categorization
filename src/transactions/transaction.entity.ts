@@ -1,5 +1,6 @@
-import { Entity, PrimaryColumn, Column } from 'typeorm';
+import { Entity, PrimaryColumn, Column, ManyToOne } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
+import { Batch } from './batch.entity';
 import { TransactionCategory } from './transaction-category.enum';
 import { TransactionType } from './transaction-type.enum';
 
@@ -44,4 +45,10 @@ export class Transaction {
     default: TransactionCategory.PENDING,
   })
   category: TransactionCategory;
+
+  @ManyToOne(() => Batch, (batch) => batch.transactions)
+  batch: Batch;
+
+  @Column({ type: 'text', nullable: true })
+  batchId: string | null;
 }
