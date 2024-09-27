@@ -9,6 +9,8 @@ GET /transactions: Retrieve all categorized transactions, paged
 
 GET /transactions/:id: Retrieve a specific transaction by ID
 
+API docs at http://localhost:3000/api-docs
+
 ## To run
 
 ```sh
