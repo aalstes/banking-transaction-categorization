@@ -36,7 +36,12 @@ describe('TransactionsController', () => {
 
   describe('findAll', () => {
     it('should return paginated transactions', async () => {
-      const result: { items: Transaction[], total: number, page: number, limit: number} = {
+      const result: {
+        items: Transaction[];
+        total: number;
+        page: number;
+        limit: number;
+      } = {
         items: [
           {
             transactionId: '1',
@@ -153,7 +158,9 @@ describe('TransactionsController', () => {
     it('should throw NotFoundException when transaction is not found', async () => {
       jest.spyOn(service, 'findOne').mockRejectedValue(new NotFoundException());
 
-      await expect(controller.findOne('999')).rejects.toThrow(NotFoundException);
+      await expect(controller.findOne('999')).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should throw InternalServerErrorException on unexpected errors', async () => {

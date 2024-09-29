@@ -90,7 +90,7 @@ describe('CategorizationService', () => {
         status: BatchStatus.CREATED,
         transactions: [
           { transactionId: '1', category: TransactionCategory.PENDING },
-          { transactionId: '2' , category: TransactionCategory.PENDING },
+          { transactionId: '2', category: TransactionCategory.PENDING },
         ],
       };
 

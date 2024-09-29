@@ -81,7 +81,10 @@ export class TransactionsService {
     }
 
     // Check if the CSV is empty or doesn't have the expected structure
-    if (parseResult.data.length === 0 || !this.isValidCSVStructure(parseResult.data[0])) {
+    if (
+      parseResult.data.length === 0 ||
+      !this.isValidCSVStructure(parseResult.data[0])
+    ) {
       throw new BadRequestException('Invalid CSV structure');
     }
 
@@ -121,14 +124,25 @@ export class TransactionsService {
   }
 
   private parseType(transactionTypeString: string): TransactionType {
-    if (Object.values(TransactionType).includes(transactionTypeString as TransactionType)) {
+    if (
+      Object.values(TransactionType).includes(
+        transactionTypeString as TransactionType,
+      )
+    ) {
       return transactionTypeString as TransactionType;
     }
     throw new Error(`Invalid transaction type: ${transactionTypeString}`);
   }
 
   private isValidCSVStructure(record: CSVTransaction): boolean {
-    const requiredFields = ['transaction_id', 'amount', 'timestamp', 'description', 'transaction_type', 'account_number'];
-    return requiredFields.every(field => field in record);
+    const requiredFields = [
+      'transaction_id',
+      'amount',
+      'timestamp',
+      'description',
+      'transaction_type',
+      'account_number',
+    ];
+    return requiredFields.every((field) => field in record);
   }
 }

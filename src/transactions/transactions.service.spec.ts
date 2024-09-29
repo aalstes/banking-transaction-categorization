@@ -22,7 +22,9 @@ describe('TransactionsService', () => {
     }).compile();
 
     service = module.get<TransactionsService>(TransactionsService);
-    repository = module.get<Repository<Transaction>>(getRepositoryToken(Transaction));
+    repository = module.get<Repository<Transaction>>(
+      getRepositoryToken(Transaction),
+    );
   });
 
   it('should be defined', () => {
@@ -31,8 +33,13 @@ describe('TransactionsService', () => {
 
   describe('findAll', () => {
     it('should return paginated results', async () => {
-      const mockTransactions = [{ transactionId: '1' }, { transactionId: '2' }] as Transaction[];
-      jest.spyOn(repository, 'findAndCount').mockResolvedValue([mockTransactions, 2]);
+      const mockTransactions = [
+        { transactionId: '1' },
+        { transactionId: '2' },
+      ] as Transaction[];
+      jest
+        .spyOn(repository, 'findAndCount')
+        .mockResolvedValue([mockTransactions, 2]);
 
       const result = await service.findAll(1, 10);
 
@@ -73,33 +80,41 @@ TXN00001,-87.18,2024-05-16 07:22:18.808433,Municipal Tax Payment,debit,NLINGB194
       const result = await service.processCSV(csvContent);
 
       expect(result).toEqual({ processed: 1, failed: 0 });
-      expect(repository.create).toHaveBeenCalledWith(expect.objectContaining({
-        accountNumber: "NLINGB1944573686",
-        amount: -87.18,
-        category: "Pending",
-        description: "Municipal Tax Payment",
-        // timestamp: new Date('2024-05-16T05:22:18.808Z'),
-        transactionId: "TXN00001",
-        transactionType: "debit",
-      }));
+      expect(repository.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          accountNumber: 'NLINGB1944573686',
+          amount: -87.18,
+          category: 'Pending',
+          description: 'Municipal Tax Payment',
+          // timestamp: new Date('2024-05-16T05:22:18.808Z'),
+          transactionId: 'TXN00001',
+          transactionType: 'debit',
+        }),
+      );
     });
 
     it('should throw BadRequestException for invalid CSV', async () => {
       const invalidCSV = 'invalid,csv,content';
 
-      await expect(service.processCSV(invalidCSV)).rejects.toThrow(BadRequestException);
+      await expect(service.processCSV(invalidCSV)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw BadRequestException for empty CSV', async () => {
       const emptyCSV = '';
 
-      await expect(service.processCSV(emptyCSV)).rejects.toThrow(BadRequestException);
+      await expect(service.processCSV(emptyCSV)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw BadRequestException for CSV with missing required fields', async () => {
       const invalidCSV = 'date,amount\n2023-05-01,100.50';
 
-      await expect(service.processCSV(invalidCSV)).rejects.toThrow(BadRequestException);
+      await expect(service.processCSV(invalidCSV)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 });
