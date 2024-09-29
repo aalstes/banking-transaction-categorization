@@ -99,6 +99,7 @@ export class OpenAIBatchProcessor implements BatchProcessor {
       const externalBatch = await this.openai.batches.retrieve(
         batch.externalBatchId,
       );
+      this.logger.log(`Status: ${externalBatch.status}. ${JSON.stringify(externalBatch.request_counts)}`);
       const externalBatchStatusString = externalBatch.status.toString();
 
       batch.externalBatchStatus = externalBatchStatusString;
