@@ -67,6 +67,16 @@ export class OpenAIBatchProcessor implements BatchProcessor {
   ) {}
 
   async submitBatch(transactions: Transaction[]): Promise<Batch> {
+    // Log available models
+    // try {
+    //   const models = await this.openai.models.list();
+    //   this.logger.log(
+    //     `Available OpenAI models: ${models.data.map((model) => model.id).join(', ')}`,
+    //   );
+    // } catch (error) {
+    //   this.logger.warn(`Failed to fetch OpenAI models: ${error.message}`);
+    // }
+
     const batch = this.batchRepository.create({
       status: BatchStatus.CREATED,
       transactions: transactions,
@@ -99,12 +109,51 @@ export class OpenAIBatchProcessor implements BatchProcessor {
       const externalBatch = await this.openai.batches.retrieve(
         batch.externalBatchId,
       );
-      this.logger.log(`Status: ${externalBatch.status}. ${JSON.stringify(externalBatch.request_counts)}`);
+      this.logger.log(
+        `Status: ${externalBatch.status}. ${JSON.stringify(externalBatch.request_counts)}`,
+      );
       const externalBatchStatusString = externalBatch.status.toString();
 
-      batch.externalBatchStatus = externalBatchStatusString;
-      batch.outputFileId = externalBatch.output_file_id || null;
-      await this.batchRepository.save(batch);
+      if (externalBatchStatusString === 'completed') {
+        this.logger.log(`Output file ID: ${externalBatch.output_file_id}`);
+      }
+      // Check for error_file_id and log errors if present
+      if (externalBatch.error_file_id) {
+        this.logger.warn(`Error file ID found: ${externalBatch.error_file_id}`);
+        try {
+          const errorFileResponse = await this.openai.files.content(
+            externalBatch.error_file_id,
+          );
+          const errorFileContents = await errorFileResponse.text();
+          this.logger.error(`Batch errors: ${errorFileContents}`);
+        } catch (errorFileError) {
+          this.logger.error(
+            `Failed to retrieve error file: ${errorFileError.message}`,
+          );
+        }
+      }
+
+      try {
+        await this.batchRepository
+          .createQueryBuilder()
+          .update(Batch)
+          .set({
+            externalBatchStatus: () => `'${externalBatchStatusString}'`,
+            outputFileId: () =>
+              externalBatch.output_file_id
+                ? `'${externalBatch.output_file_id}'`
+                : 'NULL',
+            errorFileId: () =>
+              externalBatch.error_file_id
+                ? `'${externalBatch.error_file_id}'`
+                : 'NULL',
+          })
+          .where('id = :id', { id: batchId })
+          .execute();
+      } catch (error) {
+        console.error('Error updating batch:', error);
+        throw error;
+      }
 
       return externalBatchStatusString;
     } catch (error) {
@@ -189,7 +238,7 @@ export class OpenAIBatchProcessor implements BatchProcessor {
       method: 'POST',
       url: '/v1/chat/completions',
       body: {
-        model: 'gpt-3.5-turbo',
+        model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',

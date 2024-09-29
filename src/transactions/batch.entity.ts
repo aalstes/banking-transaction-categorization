@@ -33,4 +33,7 @@ export class Batch {
 
   @Column({ type: 'text', nullable: true })
   outputFileId: string;
+
+  @Column({ nullable: true })
+  errorFileId: string | null;
 }
