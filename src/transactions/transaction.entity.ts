@@ -15,7 +15,7 @@ export class Transaction {
   amount: number;
 
   @ApiProperty({ description: 'The timestamp of the transaction' })
-  @Column({ type: 'date' })
+  @Column({ type: 'timestamp' })
   timestamp: Date;
 
   @ApiProperty({ description: 'The description of the transaction' })
