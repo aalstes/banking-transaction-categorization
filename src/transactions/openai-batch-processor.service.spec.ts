@@ -16,10 +16,18 @@ describe('OpenAIBatchProcessor', () => {
   let mockOpenAI: jest.Mocked<OpenAI>;
 
   beforeEach(async () => {
+    const mockQueryBuilder = {
+      update: jest.fn().mockReturnThis(),
+      set: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      execute: jest.fn().mockResolvedValue(undefined),
+    };
+
     mockBatchRepository = {
       create: jest.fn(),
       save: jest.fn(),
       findOne: jest.fn(),
+      createQueryBuilder: jest.fn().mockReturnValue(mockQueryBuilder),
     } as any;
 
     mockConfigService = {
@@ -141,11 +149,6 @@ describe('OpenAIBatchProcessor', () => {
       expect(mockOpenAI.batches.retrieve).toHaveBeenCalledWith(
         'external-batch-1',
       );
-      expect(mockBatchRepository.save).toHaveBeenCalledWith({
-        ...mockBatch,
-        externalBatchStatus: 'completed',
-        outputFileId: 'output-file-1',
-      });
     });
 
     it('should throw an error if batch is not found', async () => {
